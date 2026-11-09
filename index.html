@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Informe de Seguimiento del Alumno/a</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2pdf.js for client-side PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <!-- Header Navigation -->
+    <header class="bg-indigo-700 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-wrap justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-graduation-cap text-2xl text-amber-300"></i>
+                <h1 class="text-xl font-bold tracking-tight">SeguiAlumno <span class="text-xs font-normal bg-indigo-800 text-indigo-200 px-2 py-0.5 rounded-full">v1.0</span></h1>
+            </div>
+            <p class="text-xs sm:text-sm text-indigo-100 italic">Generador de Informes de Seguimiento</p>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- LEFT COLUMN: Form Input (7 cols on lg) -->
+            <section class="lg:col-span-7 space-y-6">
+                
+                <!-- Card 0: General Data (Anonymized) -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 transition-all">
+                    <h2 class="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-id-card text-indigo-600"></i> Datos Generales
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Asignatura / Materia</label>
+                            <input type="text" id="asignatura" placeholder="Nombre de la asignatura o materia" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Periodo</label>
+                            <div class="flex flex-wrap gap-4">
+                                <label class="inline-flex items-center text-sm text-slate-700 cursor-pointer">
+                                    <input type="radio" name="periodo" value="Avance primer trimestre" class="text-indigo-600 focus:ring-indigo-500">
+                                    <span class="ml-2">Avance primer trimestre</span>
+                                </label>
+                                <label class="inline-flex items-center text-sm text-slate-700 cursor-pointer">
+                                    <input type="radio" name="periodo" value="Avance segundo trimestre" class="text-indigo-600 focus:ring-indigo-500">
+                                    <span class="ml-2">Avance segundo trimestre</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 1: Actitud y Comportamiento -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 transition-all">
+                    <h2 class="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+                        <span class="bg-indigo-100 text-indigo-700 text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold">1</span>
+                        Actitud y comportamiento
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <!-- Convivencia y respeto -->
+                        <div>
+                            <span class="block text-xs font-medium text-slate-600 mb-2">Convivencia y respeto:</span>
+                            <div class="flex flex-wrap gap-2">
+                                <template id="radio-convivencia-tmpl">
+                                    <!-- Options injected via JavaScript -->
+                                </template>
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="convivencia" value="Excelente" class="sr-only"> Excelente
+                                </label>
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="convivencia" value="Adecuado" class="sr-only"> Adecuado
+                                </label>
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="convivencia" value="Mejorable" class="sr-only"> Mejorable
+                                </label>
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="convivencia" value="Inadecuado" class="sr-only"> Inadecuado
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Participacion e implicacion -->
+                        <div>
+                            <span class="block text-xs font-medium text-slate-600 mb-2">Participación e implicación en clase:</span>
+                            <div class="flex flex-wrap gap-2">
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="participacion" value="Alta" class="sr-only"> Alta
+                                </label>
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="participacion" value="Adecuada" class="sr-only"> Adecuada
+                                </label>
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="participacion" value="Irregular" class="sr-only"> Irregular
+                                </label>
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="participacion" value="Escasa" class="sr-only"> Escasa
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Observaciones actitud -->
+                        <div class="relative">
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-xs font-medium text-slate-600">Observaciones (Actitud):</label>
+                                <button type="button" onclick="startVoiceRecognition('obs_actitud', this)" class="text-xs bg-slate-100 hover:bg-indigo-100 text-slate-700 hover:text-indigo-700 px-2 py-1 rounded transition flex items-center gap-1 border border-slate-200" title="Dictar por voz">
+                                    <i class="fa-solid fa-microphone text-rose-500"></i> Dictar
+                                </button>
+                            </div>
+                            <textarea id="obs_actitud" rows="2" placeholder="Breve comentario sobre convivencia, respeto de normas y relación con compañeros/as y profesorado..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Trabajo y Hábitos de Estudio -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 transition-all">
+                    <h2 class="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+                        <span class="bg-indigo-100 text-indigo-700 text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold">2</span>
+                        Trabajo y hábitos de estudio
+                    </h2>
+
+                    <div class="space-y-4">
+                        <!-- Tareas -->
+                        <div>
+                            <span class="block text-xs font-medium text-slate-600 mb-2">Realización de tareas de forma:</span>
+                            <div class="flex flex-wrap gap-2">
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="tareas" value="Habitual" class="sr-only"> Habitual
+                                </label>
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="tareas" value="Irregular" class="sr-only"> Irregular
+                                </label>
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="tareas" value="Insuficiente" class="sr-only"> Insuficiente
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Organización -->
+                        <div>
+                            <span class="block text-xs font-medium text-slate-600 mb-2">Organización y autonomía:</span>
+                            <div class="flex flex-wrap gap-2">
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="organizacion" value="Adecuada" class="sr-only"> Adecuada
+                                </label>
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="organizacion" value="En desarrollo" class="sr-only"> En desarrollo
+                                </label>
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="organizacion" value="Necesita apoyo" class="sr-only"> Necesita apoyo
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Observaciones trabajo -->
+                        <div class="relative">
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-xs font-medium text-slate-600">Observaciones (Trabajo y hábitos):</label>
+                                <button type="button" onclick="startVoiceRecognition('obs_trabajo', this)" class="text-xs bg-slate-100 hover:bg-indigo-100 text-slate-700 hover:text-indigo-700 px-2 py-1 rounded transition flex items-center gap-1 border border-slate-200">
+                                    <i class="fa-solid fa-microphone text-rose-500"></i> Dictar
+                                </button>
+                            </div>
+                            <textarea id="obs_trabajo" rows="2" placeholder="Responsabilidad, atención, esfuerzo, entrega de actividades y constancia..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Evolución Académica -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 transition-all">
+                    <h2 class="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+                        <span class="bg-indigo-100 text-indigo-700 text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold">3</span>
+                        Evolución académica
+                    </h2>
+
+                    <div class="space-y-4">
+                        <!-- Calificaciones de pruebas -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-xs font-medium text-slate-600">Calificaciones de pruebas y actividades evaluables:</label>
+                                <button type="button" onclick="startVoiceRecognition('calificaciones', this)" class="text-xs bg-slate-100 hover:bg-indigo-100 text-slate-700 hover:text-indigo-700 px-2 py-1 rounded transition flex items-center gap-1 border border-slate-200">
+                                    <i class="fa-solid fa-microphone text-rose-500"></i> Dictar
+                                </button>
+                            </div>
+                            <input type="text" id="calificaciones" placeholder="Resultados relevantes, indicando materia o área y contexto..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                        </div>
+
+                        <!-- Progreso General -->
+                        <div>
+                            <span class="block text-xs font-medium text-slate-600 mb-2">Progreso general:</span>
+                            <div class="flex flex-wrap gap-2">
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="progreso" value="Favorable" class="sr-only"> Favorable
+                                </label>
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="progreso" value="Adecuado" class="sr-only"> Adecuado
+                                </label>
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="progreso" value="Irregular" class="sr-only"> Irregular
+                                </label>
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="progreso" value="Necesita refuerzo" class="sr-only"> Necesita refuerzo
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Dificultades detectadas -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-xs font-medium text-slate-600">Dificultades detectadas:</label>
+                                <button type="button" onclick="startVoiceRecognition('dificultades', this)" class="text-xs bg-slate-100 hover:bg-indigo-100 text-slate-700 hover:text-indigo-700 px-2 py-1 rounded transition flex items-center gap-1 border border-slate-200">
+                                    <i class="fa-solid fa-microphone text-rose-500"></i> Dictar
+                                </button>
+                            </div>
+                            <input type="text" id="dificultades" placeholder="Contenidos, competencias o materias con dificultad..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Aspectos Positivos y A Mejorar -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 transition-all">
+                    <h2 class="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+                        <span class="bg-indigo-100 text-indigo-700 text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold">4</span>
+                        Aspectos positivos y a mejorar
+                    </h2>
+
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-xs font-medium text-slate-600">Fortalezas:</label>
+                                <button type="button" onclick="startVoiceRecognition('fortalezas', this)" class="text-xs bg-slate-100 hover:bg-indigo-100 text-slate-700 hover:text-indigo-700 px-2 py-1 rounded transition flex items-center gap-1 border border-slate-200">
+                                    <i class="fa-solid fa-microphone text-rose-500"></i> Dictar
+                                </button>
+                            </div>
+                            <input type="text" id="fortalezas" placeholder="Un logro, avance o cualidad destacable..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-xs font-medium text-slate-600">Prioridades de mejora:</label>
+                                <button type="button" onclick="startVoiceRecognition('prioridades', this)" class="text-xs bg-slate-100 hover:bg-indigo-100 text-slate-700 hover:text-indigo-700 px-2 py-1 rounded transition flex items-center gap-1 border border-slate-200">
+                                    <i class="fa-solid fa-microphone text-rose-500"></i> Dictar
+                                </button>
+                            </div>
+                            <input type="text" id="prioridades" placeholder="Uno o dos aspectos concretos..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 5: Próximos Pasos -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 transition-all">
+                    <h2 class="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+                        <span class="bg-indigo-100 text-indigo-700 text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold">5</span>
+                        Próximos pasos
+                    </h2>
+
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-xs font-medium text-slate-600">Desde el centro:</label>
+                                <button type="button" onclick="startVoiceRecognition('desde_centro', this)" class="text-xs bg-slate-100 hover:bg-indigo-100 text-slate-700 hover:text-indigo-700 px-2 py-1 rounded transition flex items-center gap-1 border border-slate-200">
+                                    <i class="fa-solid fa-microphone text-rose-500"></i> Dictar
+                                </button>
+                            </div>
+                            <input type="text" id="desde_centro" placeholder="Medidas de apoyo, seguimiento o pautas..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-xs font-medium text-slate-600">Desde casa:</label>
+                                <button type="button" onclick="startVoiceRecognition('desde_casa', this)" class="text-xs bg-slate-100 hover:bg-indigo-100 text-slate-700 hover:text-indigo-700 px-2 py-1 rounded transition flex items-center gap-1 border border-slate-200">
+                                    <i class="fa-solid fa-microphone text-rose-500"></i> Dictar
+                                </button>
+                            </div>
+                            <input type="text" id="desde_casa" placeholder="Una o dos recomendaciones realistas..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                        </div>
+
+                        <div>
+                            <span class="block text-xs font-medium text-slate-600 mb-2">¿Se recomienda tutoría?</span>
+                            <div class="flex gap-4">
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-4 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="tutoria" value="Sí" class="sr-only"> Sí
+                                </label>
+                                <label class="cursor-pointer border border-slate-200 rounded-lg px-4 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
+                                    <input type="radio" name="tutoria" value="No" class="sr-only"> No
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button: Reset -->
+                <div class="flex justify-end">
+                    <button type="button" onclick="resetForm()" class="px-4 py-2 text-xs font-medium text-slate-600 bg-slate-200 hover:bg-slate-300 rounded-lg transition flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-left"></i> Limpiar formulario
+                    </button>
+                </div>
+
+            </section>
+
+            <!-- RIGHT COLUMN: Generated Reports (5 cols on lg) -->
+            <section class="lg:col-span-5 space-y-6">
+                
+                <!-- Sticky Wrapper -->
+                <div class="sticky top-20 space-y-6">
+
+                    <!-- Tab Navigation -->
+                    <div class="bg-white p-1 rounded-xl shadow-sm border border-slate-200 flex space-x-1">
+                        <button id="tab-schematic-btn" onclick="switchTab('schematic')" class="flex-1 py-2 text-xs font-semibold rounded-lg transition text-indigo-700 bg-indigo-50 shadow-sm flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-list-check"></i> Guión Esquemático
+                        </button>
+                        <button id="tab-natural-btn" onclick="switchTab('natural')" class="flex-1 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 rounded-lg transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-file-lines"></i> Lenguaje Natural
+                        </button>
+                    </div>
+
+                    <!-- REPORT 1: SCHEMATIC REPORT -->
+                    <div id="report-schematic-card" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
+                                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                                    <i class="fa-solid fa-file-lines text-indigo-600"></i> Informe Esquemático
+                                </h3>
+                                <span class="text-[10px] text-slate-400">Campos vacíos omitidos</span>
+                            </div>
+
+                            <!-- Printable Container -->
+                            <div id="schematic-printable" class="bg-slate-50 p-4 rounded-lg border border-slate-200 font-mono text-xs text-slate-800 whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
+                                <!-- Filled via JS -->
+                            </div>
+                        </div>
+
+                        <!-- Action Toolbar -->
+                        <div class="mt-4 pt-4 border-t border-slate-100 flex flex-wrap gap-2">
+                            <button onclick="copyToClipboard('schematic')" class="flex-1 px-3 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition shadow-sm flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-copy"></i> Copiar Texto
+                            </button>
+                            <button onclick="exportPDF('schematic')" class="flex-1 px-3 py-2 text-xs font-semibold text-indigo-700 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-file-pdf"></i> Exportar PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- REPORT 2: NATURAL LANGUAGE REPORT -->
+                    <div id="report-natural-card" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between hidden">
+                        <div>
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
+                                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                                    <i class="fa-solid fa-paragraph text-indigo-600"></i> Redacción en Lenguaje Natural
+                                </h3>
+                                <span class="text-[10px] text-slate-400">Síntesis docente</span>
+                            </div>
+
+                            <!-- Printable Container -->
+                            <div id="natural-printable" class="bg-slate-50 p-4 rounded-lg border border-slate-200 font-sans text-xs text-slate-800 whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
+                                <!-- Filled via JS -->
+                            </div>
+                        </div>
+
+                        <!-- Action Toolbar -->
+                        <div class="mt-4 pt-4 border-t border-slate-100 flex flex-wrap gap-2">
+                            <button onclick="copyToClipboard('natural')" class="flex-1 px-3 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition shadow-sm flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-copy"></i> Copiar Texto
+                            </button>
+                            <button onclick="exportPDF('natural')" class="flex-1 px-3 py-2 text-xs font-semibold text-indigo-700 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-file-pdf"></i> Exportar PDF
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <!-- Toast Notification for Alerts -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-3 rounded-lg shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none flex items-center gap-2 z-50">
+        <i id="toast-icon" class="fa-solid fa-check text-emerald-400"></i>
+        <span id="toast-message">Notificación</span>
+    </div>
+
+    <!-- JavaScript logic -->
+    <script>
+        // --- State and Handlers ---
+        let currentTab = 'schematic';
+
+        // Attach input event listeners to all interactive controls for real-time live preview update
+        document.querySelectorAll('input, textarea').forEach(element => {
+            element.addEventListener('input', updateReports);
+            element.addEventListener('change', updateReports);
+        });
+
+        // Tab Switching Logic
+        function switchTab(tab) {
+            currentTab = tab;
+            const schematicCard = document.getElementById('report-schematic-card');
+            const naturalCard = document.getElementById('report-natural-card');
+            const schematicBtn = document.getElementById('tab-schematic-btn');
+            const naturalBtn = document.getElementById('tab-natural-btn');
+
+            if (tab === 'schematic') {
+                schematicCard.classList.remove('hidden');
+                naturalCard.classList.add('hidden');
+                
+                schematicBtn.className = "flex-1 py-2 text-xs font-semibold rounded-lg transition text-indigo-700 bg-indigo-50 shadow-sm flex items-center justify-center gap-2";
+                naturalBtn.className = "flex-1 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 rounded-lg transition flex items-center justify-center gap-2";
+            } else {
+                schematicCard.classList.add('hidden');
+                naturalCard.classList.remove('hidden');
+
+                naturalBtn.className = "flex-1 py-2 text-xs font-semibold rounded-lg transition text-indigo-700 bg-indigo-50 shadow-sm flex items-center justify-center gap-2";
+                schematicBtn.className = "flex-1 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 rounded-lg transition flex items-center justify-center gap-2";
+            }
+        }
+
+        // Helper to get checked radio value
+        function getRadioValue(name) {
+            const checked = document.querySelector(`input[name="${name}"]:checked`);
+            return checked ? checked.value : null;
+        }
+
+        // Helper to get input text value
+        function getTextValue(id) {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            const val = el.value.trim();
+            return val !== '' ? val : null;
+        }
+
+        // Main function to update both generated reports live
+        function updateReports() {
+            // Collect Form Data
+            const data = {
+                asignatura: getTextValue('asignatura'),
+                periodo: getRadioValue('periodo'),
+                
+                convivencia: getRadioValue('convivencia'),
+                participacion: getRadioValue('participacion'),
+                obs_actitud: getTextValue('obs_actitud'),
+
+                tareas: getRadioValue('tareas'),
+                organizacion: getRadioValue('organizacion'),
+                obs_trabajo: getTextValue('obs_trabajo'),
+
+                calificaciones: getTextValue('calificaciones'),
+                progreso: getRadioValue('progreso'),
+                dificultades: getTextValue('dificultades'),
+
+                fortalezas: getTextValue('fortalezas'),
+                prioridades: getTextValue('prioridades'),
+
+                desde_centro: getTextValue('desde_centro'),
+                desde_casa: getTextValue('desde_casa'),
+                tutoria: getRadioValue('tutoria')
+            };
+
+            // 1. GENERATE SCHEMATIC REPORT (Clean Text, Anonymized)
+            let schematicLines = [];
+            schematicLines.push("INFORME DE SEGUIMIENTO DEL ALUMNO/A\n");
+
+            // Header info (Only Asignatura & periodo)
+            let headerInfo = [];
+            if (data.asignatura) headerInfo.push(`Asignatura / Materia: ${data.asignatura}`);
+            if (data.periodo) headerInfo.push(`Periodo: ${data.periodo}`);
+
+            if (headerInfo.length > 0) {
+                schematicLines.push(headerInfo.join('\n'));
+                schematicLines.push('\n');
+            }
+
+            // Section 1: Actitud y comportamiento
+            let sec1 = [];
+            if (data.convivencia) sec1.push(`  - Convivencia y respeto: ${data.convivencia}`);
+            if (data.participacion) sec1.push(`  - Participación e implicación en clase: ${data.participacion}`);
+            if (data.obs_actitud) sec1.push(`  - Observaciones:\n    ${data.obs_actitud}`);
+
+            if (sec1.length > 0) {
+                schematicLines.push("1. Actitud y comportamiento");
+                schematicLines.push(sec1.join('\n'));
+                schematicLines.push('');
+            }
+
+            // Section 2: Trabajo y hábitos de estudio
+            let sec2 = [];
+            if (data.tareas) sec2.push(`  - Realización de tareas de forma: ${data.tareas}`);
+            if (data.organizacion) sec2.push(`  - Organización y autonomía: ${data.organizacion}`);
+            if (data.obs_trabajo) sec2.push(`  - Observaciones:\n    ${data.obs_trabajo}`);
+
+            if (sec2.length > 0) {
+                schematicLines.push("2. Trabajo y hábitos de estudio");
+                schematicLines.push(sec2.join('\n'));
+                schematicLines.push('');
+            }
+
+            // Section 3: Evolución académica
+            let sec3 = [];
+            if (data.calificaciones) sec3.push(`  - Calificaciones de pruebas y actividades evaluables:\n    ${data.calificaciones}`);
+            if (data.progreso) sec3.push(`  - Progreso general: ${data.progreso}`);
+            if (data.dificultades) sec3.push(`  - Dificultades detectadas:\n    ${data.dificultades}`);
+
+            if (sec3.length > 0) {
+                schematicLines.push("3. Evolución académica");
+                schematicLines.push(sec3.join('\n'));
+                schematicLines.push('');
+            }
+
+            // Section 4: Aspectos positivos y aspectos a mejorar
+            let sec4 = [];
+            if (data.fortalezas) sec4.push(`  - Fortalezas: ${data.fortalezas}`);
+            if (data.prioridades) sec4.push(`  - Prioridades de mejora: ${data.prioridades}`);
+
+            if (sec4.length > 0) {
+                schematicLines.push("4. Aspectos positivos y aspectos a mejorar");
+                schematicLines.push(sec4.join('\n'));
+                schematicLines.push('');
+            }
+
+            // Section 5: Próximos pasos
+            let sec5 = [];
+            if (data.desde_centro) sec5.push(`  - Desde el centro: ${data.desde_centro}`);
+            if (data.desde_casa) sec5.push(`  - Desde casa: ${data.desde_casa}`);
+            if (data.tutoria) sec5.push(`  - ¿Se recomienda tutoría?: ${data.tutoria}`);
+
+            if (sec5.length > 0) {
+                schematicLines.push("5. Próximos pasos");
+                schematicLines.push(sec5.join('\n'));
+            }
+
+            const schematicText = schematicLines.join('\n');
+            document.getElementById('schematic-printable').textContent = schematicText.trim() || 'Seleccione opciones o complete el formulario para generar el informe...';
+
+
+            // 2. GENERATE NATURAL LANGUAGE REPORT (Anonymized)
+            let natParagraphs = [];
+
+            // Determine gender (alumna vs alumno) based on observation input or default to gender-inclusive/standard form
+            const fullTextContext = [
+                data.obs_actitud, data.obs_trabajo, data.calificaciones, 
+                data.dificultades, data.fortalezas, data.prioridades
+            ].filter(Boolean).join(' ').toLowerCase();
+
+            const isFemale = /\b(alumna|la|ella|chica|estudiante)\b/.test(fullTextContext) && !/\bel alumno\b/.test(fullTextContext);
+            const subj = isFemale ? 'la alumna' : 'el alumno';
+            const pron = isFemale ? 'ella' : 'él';
+
+            // Helper to clean punctuation, fix uppercase after comma, and ensure grammatical consistency
+            const fixGrammarAndCase = (str, isStartOfSentence = false) => {
+                if (!str) return '';
+                let text = str.trim();
+
+                // 1. Remove lowercase/uppercase glitches right after commas: ", Palabra" -> ", palabra"
+                text = text.replace(/,\s+([A-ZÁÉÍÓÚÑa-záéíóúñ])/g, (match, p1) => {
+                    return ', ' + p1.toLowerCase();
+                });
+
+                // 2. Normalize multiple spaces & punctuation spacing
+                text = text.replace(/\s+/g, ' ').replace(/\s+([.,;:])/g, '$1');
+
+                // 3. Fix initial casing depending on placement in sentence
+                if (isStartOfSentence) {
+                    text = text.charAt(0).toUpperCase() + text.slice(1);
+                } else {
+                    text = text.charAt(0).toLowerCase() + text.slice(1);
+                }
+
+                return text;
+            };
+
+            const ensurePeriod = (str) => {
+                if (!str) return '';
+                const trimmed = str.trim();
+                return /[.!?]$/.test(trimmed) ? trimmed : trimmed + '.';
+            };
+
+            // Title/Intro
+            let intro = `INFORME DE SEGUIMIENTO PEDAGÓGICO\n`;
+            let periodoInfo = data.periodo ? ` correspondiente al período de ${data.periodo.toLowerCase()}` : '';
+            
+            intro += `El presente informe resume el seguimiento pedagógico de ${subj}${periodoInfo}.`;
+            natParagraphs.push(intro);
+
+            // Actitud y Convivencia
+            let actitudParts = [];
+            if (data.convivencia) actitudParts.push(`mantiene una convivencia y nivel de respeto ${data.convivencia.toLowerCase()}`);
+            if (data.participacion) actitudParts.push(`su participación e implicación en las sesiones de clase es ${data.participacion.toLowerCase()}`);
+            
+            if (actitudParts.length > 0 || data.obs_actitud) {
+                let p1 = `En el ámbito de la actitud y el comportamiento, ${subj} ` + actitudParts.join(' y ') + '.';
+                if (data.obs_actitud) {
+                    const cleanObs = fixGrammarAndCase(data.obs_actitud, false);
+                    p1 += ` En este sentido, ${ensurePeriod(cleanObs)}`;
+                }
+                natParagraphs.push(p1);
+            }
+
+            // Trabajo y Hábitos
+            let trabajoParts = [];
+            if (data.tareas) trabajoParts.push(`la realización de tareas se efectúa de manera ${data.tareas.toLowerCase()}`);
+            if (data.organizacion) trabajoParts.push(`muestra una organización y autonomía ${data.organizacion.toLowerCase()}`);
+
+            if (trabajoParts.length > 0 || data.obs_trabajo) {
+                let p2 = `Respecto al trabajo diario y los hábitos de estudio, ` + trabajoParts.join(', mientras que ') + '.';
+                if (data.obs_trabajo) {
+                    const cleanObs = fixGrammarAndCase(data.obs_trabajo, false);
+                    p2 += ` Sobre su dedicación y esfuerzo, ${ensurePeriod(cleanObs)}`;
+                }
+                natParagraphs.push(p2);
+            }
+
+            // Evolución Académica
+            let academicaParts = [];
+            if (data.progreso) academicaParts.push(`su progreso académico general se evalúa como ${data.progreso.toLowerCase()}`);
+            
+            if (academicaParts.length > 0 || data.calificaciones || data.dificultades) {
+                let p3 = `En cuanto a la evolución académica, ` + (academicaParts.length > 0 ? academicaParts[0] : `se valora el rendimiento del período de ${subj}`) + '.';
+                if (data.calificaciones) {
+                    const cleanCal = fixGrammarAndCase(data.calificaciones, false);
+                    p3 += ` En relación con las pruebas evaluables, ${ensurePeriod(cleanCal)}`;
+                }
+                if (data.dificultades) {
+                    const cleanDif = fixGrammarAndCase(data.dificultades, false);
+                    p3 += ` Se observa que presenta ciertas dificultades en ${ensurePeriod(cleanDif)}`;
+                }
+                natParagraphs.push(p3);
+            }
+
+            // Fortalezas y Prioridades
+            if (data.fortalezas || data.prioridades) {
+                let p4 = '';
+                if (data.fortalezas) {
+                    const cleanFort = fixGrammarAndCase(data.fortalezas, false);
+                    p4 += `Entre sus principales virtudes destaca que ${ensurePeriod(cleanFort)} `;
+                }
+                if (data.prioridades) {
+                    const cleanPrio = fixGrammarAndCase(data.prioridades, false);
+                    p4 += `Asimismo, como aspecto clave a trabajar en este momento conviene ${ensurePeriod(cleanPrio)}`;
+                }
+                natParagraphs.push(p4.trim());
+            }
+
+            // Próximos pasos
+            if (data.desde_centro || data.desde_casa || data.tutoria) {
+                let p5 = 'Como propuesta de actuación, ';
+                let pasos = [];
+                if (data.desde_centro) {
+                    const cleanCent = fixGrammarAndCase(data.desde_centro, false);
+                    pasos.push(`desde el centro educativo se ${ensurePeriod(cleanCent).slice(0, -1)}`);
+                }
+                if (data.desde_casa) {
+                    const cleanCasa = fixGrammarAndCase(data.desde_casa, false);
+                    pasos.push(`por parte de la familia se aconseja ${ensurePeriod(cleanCasa).slice(0, -1)}`);
+                }
+                p5 += pasos.join(', mientras que ') + '.';
+
+                if (data.tutoria) {
+                    p5 += ` ${data.tutoria === 'Sí' ? 'Por todo ello, se considera oportuno celebrar una tutoría de seguimiento.' : 'En este momento no se estima necesaria una reunión presencial.'}`;
+                }
+                natParagraphs.push(p5);
+            }
+
+            const naturalText = natParagraphs.join('\n\n');
+            document.getElementById('natural-printable').textContent = naturalText.trim() || 'Seleccione opciones o complete el formulario para redactar la síntesis pedagógica...';
+        }
+
+        // --- Voice-to-Text Dictation (Web Speech API) ---
+        // Reliable PDF Exporting via Printable Document Window
+        function exportPDF(type) {
+            const elementId = type === 'schematic' ? 'schematic-printable' : 'natural-printable';
+            const sourceElement = document.getElementById(elementId);
+            const contentText = sourceElement.textContent;
+
+            if (!contentText || contentText.startsWith('Seleccione opciones')) {
+                showToast('No hay contenido para exportar en PDF', 'error');
+                return;
+            }
+
+            const title = type === 'schematic' ? 'Informe_Esquematico_Seguimiento' : 'Informe_Sintesis_Seguimiento';
+            const printWin = window.open('', '_blank', 'width=800,height=900');
+
+            if (!printWin) {
+                showToast('Permita las ventanas emergentes para generar el PDF', 'error');
+                return;
+            }
+
+            const fontStyle = type === 'schematic' 
+                ? "font-family: 'Courier New', Courier, monospace; font-size: 13px;" 
+                : "font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px;";
+
+            printWin.document.write(`
+                <!DOCTYPE html>
+                <html lang="es">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>${title}</title>
+                    <style>
+                        body {
+                            padding: 40px;
+                            color: #1e293b;
+                            background: #ffffff;
+                            ${fontStyle}
+                            line-height: 1.6;
+                            white-space: pre-wrap;
+                            word-wrap: break-word;
+                        }
+                        @page {
+                            margin: 20mm;
+                        }
+                    </style>
+                </head>
+                <body>${contentText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</body>
+                </html>
+            `);
+
+            printWin.document.close();
+            printWin.focus();
+
+            setTimeout(() => {
+                printWin.print();
+                printWin.close();
+            }, 250);
+        }
+
+        // Reset Form
+        function resetForm() {
+            document.querySelectorAll('input[type="text"], textarea').forEach(input => input.value = me = '');
+            document.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
+            updateReports();
+            showToast('Formulario reiniciado', 'info');
+        }
+
+        // Notification Toast
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.textContent = message;
+
+            if (type === 'success') {
+                toastIcon.className = "fa-solid fa-check text-emerald-400";
+            } else if (type === 'error') {
+                toastIcon.className = "fa-solid fa-circle-exclamation text-rose-400";
+            } else {
+                toastIcon.className = "fa-solid fa-info-circle text-sky-400";
+            }
+
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        // Initialize Live Preview
+        updateReports();
+
+        // --- Voice-to-Text Dictation (Web Speech API) ---
+        let activeRecognition = null;
+        let activeTargetId = null;
+
+        function startVoiceRecognition(targetId, buttonEl) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            if (!SpeechRecognition) {
+                showToast('Tu navegador no soporta el dictado por voz (Web Speech API)', 'error');
+                return;
+            }
+
+            // If already listening on the same field, stop it
+            if (activeRecognition && activeTargetId === targetId) {
+                activeRecognition.stop();
+                return;
+            }
+
+            // If listening on another field, stop previous session
+            if (activeRecognition) {
+                activeRecognition.stop();
+            }
+
+            try {
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'es-ES';
+                recognition.continuous = false; // Stops automatically when pause or silence is detected
+                recognition.interimResults = true;
+
+                activeRecognition = recognition;
+                activeTargetId = targetId;
+
+                const targetInput = document.getElementById(targetId);
+                const initialText = targetInput.value;
+                let originalBtnHTML = buttonEl.innerHTML;
+
+                recognition.onstart = () => {
+                    buttonEl.innerHTML = '<i class="fa-solid fa-microphone-slash text-white animate-pulse"></i> Grabando...';
+                    buttonEl.classList.remove('bg-slate-100', 'text-slate-700', 'hover:bg-indigo-100');
+                    buttonEl.classList.add('bg-rose-600', 'text-white');
+                    showToast('Dictado activado. Habla ahora...', 'info');
+                };
+
+                recognition.onresult = (event) => {
+                    let transcript = '';
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        transcript += event.results[i][0].transcript;
+                    }
+
+                    // Capitalize initial character of spoken transcript
+                    if (transcript.length > 0) {
+                        transcript = transcript.trimStart();
+                        transcript = transcript.charAt(0).toUpperCase() + transcript.slice(1);
+                    }
+
+                    targetInput.value = initialText ? (initialText + ' ' + transcript) : transcript;
+                    updateReports();
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    if (event.error === 'not-allowed') {
+                        showToast('Permiso de micrófono denegado en el navegador', 'error');
+                    } else if (event.error !== 'no-speech') {
+                        showToast('Error en el reconocimiento de voz: ' + event.error, 'error');
+                    }
+                };
+
+                recognition.onend = () => {
+                    buttonEl.innerHTML = originalBtnHTML;
+                    buttonEl.classList.remove('bg-rose-600', 'text-white');
+                    buttonEl.classList.add('bg-slate-100', 'text-slate-700', 'hover:bg-indigo-100');
+                    activeRecognition = null;
+                    activeTargetId = null;
+                };
+
+                recognition.start();
+
+            } catch (err) {
+                console.error(err);
+                showToast('No se pudo iniciar el micrófono', 'error');
+            }
+        }
+    </script>
+</body>
+</html>
