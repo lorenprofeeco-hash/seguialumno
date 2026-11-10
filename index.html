@@ -94,9 +94,6 @@
                         <div>
                             <span class="block text-xs font-medium text-slate-600 mb-2">Convivencia y respeto:</span>
                             <div class="flex flex-wrap gap-2">
-                                <template id="radio-convivencia-tmpl">
-                                    <!-- Options injected via JavaScript -->
-                                </template>
                                 <label class="cursor-pointer border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:text-indigo-700">
                                     <input type="radio" name="convivencia" value="Excelente" class="sr-only"> Excelente
                                 </label>
@@ -694,7 +691,60 @@
             document.getElementById('natural-printable').textContent = naturalText.trim() || 'Seleccione opciones o complete el formulario para redactar la síntesis pedagógica...';
         }
 
-        // --- Voice-to-Text Dictation (Web Speech API) ---
+        // --- Copy to Clipboard Functionality ---
+        function copyToClipboard(type) {
+            const elementId = type === 'schematic' ? 'schematic-printable' : 'natural-printable';
+            const element = document.getElementById(elementId);
+            
+            if (!element) return;
+            const textToCopy = element.textContent.trim();
+
+            if (!textToCopy || textToCopy.startsWith('Seleccione opciones')) {
+                showToast('No hay contenido para copiar', 'error');
+                return;
+            }
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(textToCopy)
+                    .then(() => {
+                        showToast('Texto copiado al portapapeles', 'success');
+                    })
+                    .catch(err => {
+                        console.error('Error al copiar al portapapeles:', err);
+                        fallbackCopyToClipboard(textToCopy);
+                    });
+            } else {
+                fallbackCopyToClipboard(textToCopy);
+            }
+        }
+
+        // Fallback for non-HTTPS or older browsers
+        function fallbackCopyToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.top = '0';
+            textArea.style.left = '0';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast('Texto copiado al portapapeles', 'success');
+                } else {
+                    showToast('No se pudo copiar el texto', 'error');
+                }
+            } catch (err) {
+                console.error('Fallback execCommand error:', err);
+                showToast('Error al copiar el texto', 'error');
+            }
+
+            document.body.removeChild(textArea);
+        }
+
         // Reliable PDF Exporting via Printable Document Window
         function exportPDF(type) {
             const elementId = type === 'schematic' ? 'schematic-printable' : 'natural-printable';
@@ -754,7 +804,7 @@
 
         // Reset Form
         function resetForm() {
-            document.querySelectorAll('input[type="text"], textarea').forEach(input => input.value = me = '');
+            document.querySelectorAll('input[type="text"], textarea').forEach(input => input.value = '');
             document.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
             updateReports();
             showToast('Formulario reiniciado', 'info');
